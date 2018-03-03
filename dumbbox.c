@@ -81,7 +81,7 @@ void dumbbox_setup(void (*target)(void)) {
     }
 }
 
-/* ============================== PRIVILEGIED CODE ============================== */
+/* ============================== PRIVILEGED CODE ============================== */
 void dumbbox_broker(void) {
 
     struct iovec iov;
@@ -228,7 +228,7 @@ int32_t dumbbox_sendfd(int32_t socket, int32_t fd) {
 }
 
 
-/* ============================== UNPRILEGED CODE ============================== */
+/* ============================== UNPRIVILEGED CODE ============================== */
 int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags) {
     ssize_t ret;
 
