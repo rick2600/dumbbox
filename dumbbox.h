@@ -3,7 +3,7 @@
 #define READ  0
 #define WRITE 1
 
-#define DUMMBOX_OPEN 1
+#define DUMBBOX_OPEN 1
 
 #define FETCH_INT32(req, off) *(int32_t *)((void *)&((req).buffer)+(off))
 

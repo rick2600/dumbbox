@@ -119,7 +119,7 @@ void dumbbox_process_request(void) {
     char *s0;
     
     switch (request.command) {
-        case DUMMBOX_OPEN: {
+        case DUMBBOX_OPEN: {
             s0 = (char *)&request.buffer;
             i0 = FETCH_INT32(request, request.param1.offset);
             dumbbox_priv_open(s0, i0);         
@@ -233,9 +233,9 @@ int32_t dumbbox_sendfd(int32_t socket, int32_t fd) {
 
 /* ============================== UNPRIVILEGED CODE ============================== */
 int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags) {
-    ssize_t ret;
+    int32_t ret;
 
-    dumbbox_send_request_si(DUMMBOX_OPEN, pathname, flags);
+    dumbbox_send_request_si(DUMBBOX_OPEN, pathname, flags);
     ret = dumbbox_get_response();
     
     if (ret != -1) {

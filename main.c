@@ -21,8 +21,6 @@ int32_t main(int32_t argc, char **argv) {
 
 
 void target_handler(void) {
-    int32_t fd;
-
     read_file("/tmp/testfile");
     read_file("/etc/passwd");
 }
