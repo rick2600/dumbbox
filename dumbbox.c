@@ -12,6 +12,9 @@
 #include <sys/prctl.h>
 #include "dumbbox.h"
 
+/* Credits to https://gist.github.com/nazgee/2396992 for fd passing code */
+
+
 //channel_t channel;
 int32_t channel_request[2];
 int32_t channel_response[2];
