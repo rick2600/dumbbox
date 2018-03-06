@@ -18,9 +18,8 @@ typedef struct {
 typedef struct {
     uint32_t command;
     uint32_t params_count;
-    param_info_t param0;
-    param_info_t param1;
-    param_info_t param2;
+    param_info_t param[3];
+    uint32_t next_offset;
     char buffer[1024];    
 } dumbbox_request_t;
 
@@ -51,6 +50,8 @@ int32_t dumbbox_is_safepath(const char *pathname);
 
 // unpriv functions
 int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags);
-void dumbbox_send_request_si(uint32_t command, const char *s0, int32_t i0);
+void dumbbox_send_request_si(uint32_t command, const char *s, int32_t i);
+void dumbbox_write_int(int32_t value);
+void dumbbox_write_string(const char *value);
 ssize_t dumbbox_get_response(void);
 int32_t dumbbox_recvfd(int32_t socket);

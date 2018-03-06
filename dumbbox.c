@@ -28,8 +28,15 @@ void dumbbox_enter(void) {
     scmp_filter_ctx ctx;
     ctx = seccomp_init(SCMP_ACT_KILL);
 
-    prctl(PR_SET_NO_NEW_PRIVS, 1);
-    prctl(PR_SET_DUMPABLE, 0);
+    if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1) {
+        perror("prctl");
+        exit(EXIT_FAILURE);
+    }
+
+    if (prctl(PR_SET_DUMPABLE, 0) == -1) {
+        perror("prctl");
+        exit(EXIT_FAILURE);
+    }
 
 
     seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
@@ -121,7 +128,7 @@ void dumbbox_process_request(void) {
     switch (request.command) {
         case DUMBBOX_OPEN: {
             s0 = (char *)&request.buffer;
-            i0 = FETCH_INT32(request, request.param1.offset);
+            i0 = FETCH_INT32(request, request.param[1].offset);
             dumbbox_priv_open(s0, i0);         
         }
         break;
@@ -134,6 +141,7 @@ int32_t dumbbox_priv_open(const char *pathname, int32_t flags) {
     int32_t fd;    
 
     if (!dumbbox_is_safepath(pathname)) {
+        printf("Broker: access denied to '%s'!\n", pathname);
         dumbbox_send_response(STATUS_DENIED, -1);
         return -1;
     }
@@ -243,8 +251,6 @@ int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags) {
             ret = dumbbox_recvfd(channel_response[READ]);
         else if (response.status == STATUS_ERR)
             ret = response.ret;
-        else
-            printf("Broker: access denied to '%s'!\n", pathname);
     }
     return ret;
 
@@ -252,27 +258,34 @@ int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags) {
 
 
 
-void dumbbox_send_request_si(uint32_t command, const char *s0, int32_t i0) {
+void dumbbox_write_string(const char *value) {
+    uint32_t params_count = request.params_count;
+    char *s = ((char *)request.buffer) + request.next_offset;
+
+    request.param[params_count].type = T_STRING;
+    request.param[params_count].offset = request.next_offset;
+    request.param[params_count].size = strlen(value) + 1;
+    strcpy(s, value);
+    
+    request.next_offset += request.param[params_count].size;
+    request.params_count++;
+}
+
+void dumbbox_write_int(int32_t value) {
+    uint32_t params_count = request.params_count;
+    request.param[params_count].type = T_INT;
+    request.param[params_count].offset = request.next_offset;
+    request.param[params_count].size = sizeof(int32_t);
+    *((int32_t *)(((void *)&request.buffer)+request.next_offset)) = value;
+    request.next_offset += request.param[params_count].size;
+    request.params_count++;  
+}
+
+void dumbbox_send_request_si(uint32_t command, const char *s, int32_t i) {
 
     struct msghdr msg;
     struct iovec iov;
     int32_t ret;
-    size_t next_offset = 0;
-
-    memset(&request, 0, sizeof(request));
-    request.command = command;
-    request.params_count = 2;
-    
-    request.param0.type = T_STRING;
-    request.param0.offset = next_offset;
-    request.param0.size = strlen(s0) + 1;
-    strcpy(request.buffer, s0);
-    next_offset += request.param0.size;
-
-    request.param1.type = T_INT;
-    request.param1.offset = next_offset;
-    request.param1.size = sizeof(int32_t);
-    *((int32_t *)(((void *)&request.buffer)+next_offset)) = i0;
 
     iov.iov_base = &request;
     iov.iov_len = sizeof(request);
@@ -283,7 +296,12 @@ void dumbbox_send_request_si(uint32_t command, const char *s0, int32_t i0) {
     msg.msg_iovlen = 1;
     msg.msg_flags = 0;
     msg.msg_control = 0;
-    msg.msg_controllen = 0;
+    msg.msg_controllen = 0;    
+
+    memset(&request, 0, sizeof(request));
+    request.command = command;
+    dumbbox_write_string(s);
+    dumbbox_write_int(i);
 
     ret = sendmsg(channel_request[WRITE], &msg, 0);
     if (ret == -1) {
