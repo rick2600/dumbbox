@@ -118,7 +118,6 @@ void dumbbox_broker(void) {
 }
 
 
-
 void dumbbox_process_request(void) {
 
     int32_t i0;
@@ -133,7 +132,6 @@ void dumbbox_process_request(void) {
         break;
     }
 }
-
 
 
 int32_t dumbbox_priv_open(const char *pathname, int32_t flags) {
@@ -158,6 +156,7 @@ int32_t dumbbox_priv_open(const char *pathname, int32_t flags) {
     }
     return fd;
 }
+
 
 int32_t dumbbox_is_safepath(const char *pathname) {
     
@@ -202,7 +201,6 @@ void dumbbox_send_response(status_t status, int32_t ret) {
 }
 
 
-
 int32_t dumbbox_sendfd(int32_t socket, int32_t fd) {
 
     int32_t ret;
@@ -238,7 +236,6 @@ int32_t dumbbox_sendfd(int32_t socket, int32_t fd) {
     return ret;
 }
 
-
 /* ============================== UNPRIVILEGED CODE ============================== */
 int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags) {
 
@@ -258,7 +255,6 @@ int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags) {
 }
 
 
-
 void dumbbox_write_string(const char *value) {
 
     uint32_t params_count = request.params_count;
@@ -273,6 +269,7 @@ void dumbbox_write_string(const char *value) {
     request.params_count++;
 }
 
+
 void dumbbox_write_int(int32_t value) {
 
     uint32_t params_count = request.params_count;
@@ -285,6 +282,7 @@ void dumbbox_write_int(int32_t value) {
     request.next_offset += request.param[params_count].size;
     request.params_count++;  
 }
+
 
 void dumbbox_send_request_si(uint32_t command, const char *s, int32_t i) {
 
@@ -314,7 +312,6 @@ void dumbbox_send_request_si(uint32_t command, const char *s, int32_t i) {
         exit(EXIT_FAILURE);
     }
 }
-
 
 
 ssize_t dumbbox_get_response(void) {
@@ -348,8 +345,9 @@ ssize_t dumbbox_get_response(void) {
     return len;
 }
 
+
 int32_t dumbbox_recvfd(int32_t socket) {
-    
+
     ssize_t len;
     int32_t fd;
     char buf[1];
