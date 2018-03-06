@@ -38,7 +38,6 @@ void dumbbox_enter(void) {
         exit(EXIT_FAILURE);
     }
 
-
     seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
     seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
     seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
@@ -115,13 +114,13 @@ void dumbbox_broker(void) {
         len = recvmsg(channel_request[READ], &msg, 0);
         if (len > 0)
             dumbbox_process_request();    
-    }
-    
+    }    
 }
 
 
 
 void dumbbox_process_request(void) {
+
     int32_t i0;
     char *s0;
     
@@ -138,6 +137,7 @@ void dumbbox_process_request(void) {
 
 
 int32_t dumbbox_priv_open(const char *pathname, int32_t flags) {
+    
     int32_t fd;    
 
     if (!dumbbox_is_safepath(pathname)) {
@@ -169,7 +169,6 @@ int32_t dumbbox_is_safepath(const char *pathname) {
 
     if (strstr(pathname, "/tmp/") != pathname)
        return 0;   
-
 
     return 1;     
 }
@@ -205,6 +204,7 @@ void dumbbox_send_response(status_t status, int32_t ret) {
 
 
 int32_t dumbbox_sendfd(int32_t socket, int32_t fd) {
+
     int32_t ret;
     char dummy = '$';
     char cmsgbuf[CMSG_SPACE(sizeof(int32_t))];    
@@ -241,6 +241,7 @@ int32_t dumbbox_sendfd(int32_t socket, int32_t fd) {
 
 /* ============================== UNPRIVILEGED CODE ============================== */
 int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags) {
+
     int32_t ret;
 
     dumbbox_send_request_si(DUMBBOX_OPEN, pathname, flags);
@@ -259,6 +260,7 @@ int32_t dumbbox_unpriv_open(const char *pathname, int32_t flags) {
 
 
 void dumbbox_write_string(const char *value) {
+
     uint32_t params_count = request.params_count;
     char *s = ((char *)request.buffer) + request.next_offset;
 
@@ -272,11 +274,14 @@ void dumbbox_write_string(const char *value) {
 }
 
 void dumbbox_write_int(int32_t value) {
+
     uint32_t params_count = request.params_count;
+
     request.param[params_count].type = T_INT;
     request.param[params_count].offset = request.next_offset;
     request.param[params_count].size = sizeof(int32_t);
     *((int32_t *)(((void *)&request.buffer)+request.next_offset)) = value;
+
     request.next_offset += request.param[params_count].size;
     request.params_count++;  
 }
@@ -344,6 +349,7 @@ ssize_t dumbbox_get_response(void) {
 }
 
 int32_t dumbbox_recvfd(int32_t socket) {
+    
     ssize_t len;
     int32_t fd;
     char buf[1];
